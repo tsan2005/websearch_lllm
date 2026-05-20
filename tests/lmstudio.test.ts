@@ -22,8 +22,8 @@ function makeDeepResult(): DeepSearchResult {
       { title: 'Source Two', url: 'https://two.com', snippet: 'snippet 2' },
     ],
     pages: [
-      { url: 'https://one.com', title: 'Source One', content: 'Content from source one.', wordCount: 4, fetchedAt: '' },
-      { url: 'https://two.com', title: 'Source Two', content: '', wordCount: 0, fetchedAt: '', error: 'timeout' },
+      { url: 'https://one.com', title: 'Source One', content: 'Content from source one.', wordCount: 4 },
+      { url: 'https://two.com', title: 'Source Two', content: '', wordCount: 0, error: 'timeout' },
     ],
     fetchedCount: 1,
     failedCount: 1,
