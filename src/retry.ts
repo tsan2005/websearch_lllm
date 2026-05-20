@@ -21,6 +21,8 @@ export async function withRetry<T>(
     shouldRetry = () => true,
   } = options;
 
+  if (maxAttempts < 1) throw new Error('maxAttempts must be at least 1');
+
   let lastError: unknown;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
