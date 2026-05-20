@@ -5,7 +5,7 @@ import { z } from 'zod';
 import pLimit from 'p-limit';
 import { BraveSearch } from './search.js';
 import { fetchPage } from './fetch.js';
-import { getWordCount, validateUrl, sanitizeQuery } from './utils.js';
+import { getWordCount, validateUrl } from './utils.js';
 import { RateLimiter } from './rate-limiter.js';
 import { LMStudioClient } from './lmstudio.js';
 import { DeepSearchResult, FetchedPage } from './types.js';
@@ -124,9 +124,8 @@ server.registerTool(
     },
   },
   async ({ query, num_results }) => {
-    const safeQuery = sanitizeQuery(query);
     const count = clamp(num_results ?? 3, 1, 5);
-    const deep = await runDeepSearch(safeQuery, count);
+    const deep = await runDeepSearch(query, count);
 
     const sourceLines = deep.searchResults
       .map((r, i) => `[${i + 1}] ${r.title} - ${r.url}`)
@@ -139,7 +138,7 @@ server.registerTool(
     }).join('\n\n---\n\n');
 
     const text =
-      `Deep Search: ${safeQuery}\n` +
+      `Deep Search: ${query}\n` +
       `Found ${deep.searchResults.length} results, fetched ${deep.fetchedCount} pages` +
       (deep.failedCount > 0 ? ` (${deep.failedCount} failed)` : '') +
       `.\n\nSources:\n${sourceLines}\n\nContent:\n\n${contentBlocks}`;
@@ -158,8 +157,6 @@ server.registerTool(
     },
   },
   async ({ query, num_results }) => {
-    const safeQuery = sanitizeQuery(query);
-
     const available = await lmstudio.isAvailable();
     if (!available) {
       return {
@@ -173,15 +170,15 @@ server.registerTool(
     }
 
     const count = clamp(num_results ?? 3, 1, 5);
-    const deep = await runDeepSearch(safeQuery, count);
-    const synthesis = await lmstudio.synthesize(safeQuery, deep);
+    const deep = await runDeepSearch(query, count);
+    const synthesis = await lmstudio.synthesize(query, deep);
 
     const sourceLines = deep.searchResults
       .map((r, i) => `[${i + 1}] ${r.title} - ${r.url}`)
       .join('\n');
 
     const text =
-      `Smart Search: ${safeQuery}\n` +
+      `Smart Search: ${query}\n` +
       `Model: ${synthesis.model} | Sources: ${deep.searchResults.length} | Pages fetched: ${deep.fetchedCount}\n\n` +
       `Answer:\n${synthesis.answer}\n\nSources:\n${sourceLines}`;
 
